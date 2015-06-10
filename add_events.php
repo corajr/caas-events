@@ -33,8 +33,8 @@ class Events_Command extends WP_CLI_Command {
                 'ping_status' => 'closed',
             ));
             if ($post_id) {
-                add_post_meta($post_id, 'wpcf-event-date-time', array($event['datetime']));
-                add_post_meta($post_id, 'wpcf-location', array($event['location']));
+                add_post_meta($post_id, 'wpcf-event-date-time', $event['datetime']);
+                add_post_meta($post_id, 'wpcf-location', $event['location']);
             }
         }
     
