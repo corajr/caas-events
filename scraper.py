@@ -13,7 +13,7 @@ def path2url(path):
     path = os.path.abspath(path)
     return urlparse.urljoin('file:', urllib.pathname2url(path))
 
-base_url = path2url("./www.princeton.edu/africanamericanstudies/events_archive/index.xml")
+base_url = "http://www.princeton.edu/africanamericanstudies/events_archive/index.xml"
 archive_url = urlparse.urljoin(base_url, "index.xml")
 
 date_re = re.compile(r"(\d+)/(\d+)/(\d+)\s+at\s+(\d+):(\d\d) (.m)")

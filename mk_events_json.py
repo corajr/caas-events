@@ -2,14 +2,17 @@
 
 import scraperwiki
 import json
-from parse import retrieve_date
+import calendar
+from scraper import retrieve_date
+from pytz import timezone
 
 def get_events():
     return scraperwiki.sql.select("* from swdata")
 
 def event_post(event):
     dt = retrieve_date(event['datetime'])
-    event['datetime'] = dt.isoformat()
+    dt = dt.replace(tzinfo=timezone('US/Eastern'))
+    event['datetime'] = calendar.timegm(dt.utctimetuple())
     event['images'] = json.loads(event['images'])
     return event
 
