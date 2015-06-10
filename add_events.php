@@ -27,7 +27,7 @@ class Events_Command extends WP_CLI_Command {
             $post_id = wp_insert_post(array(
                 'post_type' => 'event',
                 'post_title' => $event['title'],
-                'post_content' => $event['content'],
+                'post_content' => $event['description'],
                 'post_status' => 'publish',
                 'comment_status' => 'closed',
                 'ping_status' => 'closed',
