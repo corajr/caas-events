@@ -58,7 +58,11 @@ def scrape_event(url):
     data['location'] = soup.select(".events_location > strong")[0].next_sibling.strip()
     date_str = soup.select(".events_datetime > strong")[0].next_sibling.split('-')[0]
     data['datetime'] = mk_clean_date(date_str)
-    data['description'] = '\n\n'.join(soup.select('.events_desc')[0].stripped_strings)
+    desc = '\n\n'.join(soup.select('.events_desc')[0].stripped_strings)
+    cmnts = soup.select('.events_comments')
+    if len(cmnts) > 0:
+        desc += '\n\n' + '\n\n'.join(cmnts[0].stripped_strings)
+    data['description'] = desc
     data['images'] = json.dumps([img['src'] for img in soup.select('p img')])
     
     scraperwiki.sql.save(["id"], data)
