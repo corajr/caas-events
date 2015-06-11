@@ -35,6 +35,25 @@ class Events_Command extends WP_CLI_Command {
             if ($post_id) {
                 add_post_meta($post_id, 'wpcf-event-date-time', $event['datetime']);
                 add_post_meta($post_id, 'wpcf-location', $event['location']);
+                add_post_meta($post_id, 'old-event-id', $event['id']);
+            }
+        }
+    
+        WP_CLI::success( "$filename was successfully imported." );
+    }
+    function update( $args, $assoc_args ) {
+        list( $filename ) = $args;
+        $js_str = file_get_contents($filename);
+        $json_a = json_decode($js_str, true);
+
+        foreach ($json_a as $event) {
+			$args = array( 'meta_key' => 'old-event-id',
+                           'meta_value' => $event['id'],
+                           'post_type' => 'event',
+			);
+			$posts = get_posts($args);
+            if (!empty($posts)) {
+                update_post_meta($posts[0]->ID, 'wpcf-event-date-time', $event['datetime']);
             }
         }
     
