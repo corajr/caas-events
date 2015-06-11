@@ -1,7 +1,7 @@
 www.princeton.edu
 events.json
 scraperwiki.sqlite
-
+events.tsv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
