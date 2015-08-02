@@ -13,7 +13,9 @@ function academic_year(DateTime $userDate) {
 
 class Taxonomy {
     public static function get_year($event) {
-        $year = academic_year(new DateTime($event['datetime']));
+        $dt = new DateTime();
+        $dt->setTimestamp($event['datetime']);
+        $year = academic_year($dt);
         return $year;
     }
 
@@ -30,10 +32,11 @@ class Taxonomy {
         if (!empty($terms)) {
             $parent_ID = $terms[0]->ID;
         } else {
-            $parent_ID = wp_insert_term(
+            $parent = wp_insert_term(
                 $event_type,
                 EVENT_TYPE_TAXONOMY
             );
+            $parent_ID = $parent['term_id'];
         }
 
         // Get or add academic-year term
@@ -45,13 +48,14 @@ class Taxonomy {
         if(!empty($child_terms)) {
             $event_type_ids[] = $child_terms[0]->ID;
         } else {
-            $event_type_ids[] = wp_insert_term(
+            $term = wp_insert_term(
                 $year,
                 EVENT_TYPE_TAXONOMY,
                 array(
                     'parent' => $parent_ID,
                 )
             );
+            $event_type_ids[] = $term['term_id'];
         }
 
         return $event_type_ids;
