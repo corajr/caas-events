@@ -24,23 +24,42 @@ class Taxonomy {
         return $year;
     }
 
+    public static function search_name_then_slug($name, $args = array()) {
+        $name = array(
+            'name__like' => $name
+        );
+
+        $args1 = array_merge($args, $name);
+        $terms = get_terms(EVENT_TYPE_TAXONOMY, $args1);
+        if (is_wp_error($terms)) {
+            die_from('search failed', $terms, array($event_type));
+        } else if (!empty($terms)) {
+            return $terms[0]->ID;
+        } else {
+            $slug = array(
+                'slug' => sanitize_title($name),
+            );
+            $args2 = array_merge($args, $slug);
+            $terms = get_terms(EVENT_TYPE_TAXONOMY, $args2);
+            if (is_wp_error($terms)) {
+                die_from('search failed', $terms, array($event_type));
+            } else if (!empty($terms)) {
+                return $terms[0]->ID;
+            } else {
+                return false;
+            }
+        }
+    }
+
     public static function get_or_create_terms($event) {
         $event_type_ids = array();
         $year = static::get_year($event);
         $event_type = $event['lecture-series'];
 
         // Get or add parent term
-        $args = array(
-            'name__like' => $event_type,
-            'get' => 'all',
-        );
-        $terms = get_terms(EVENT_TYPE_TAXONOMY, $args);
-        if (is_wp_error($terms)) {
-            die_from('search failed', $terms, array($event_type));
-        }
-        else if (!empty($terms)) {
-            $parent_ID = $terms[0]->ID;
-        } else {
+        $parent_ID = static::search_name_then_slug($event_type);
+
+        if ( ! $parent_ID ) {
             $parent = wp_insert_term(
                 $event_type,
                 EVENT_TYPE_TAXONOMY
@@ -58,13 +77,11 @@ class Taxonomy {
         // Get or add academic-year term
         $child_args = array(
             'parent' => $parent_ID,
-            'name__like' => $year,
-            'get' => 'all',
         );
-        $child_terms = get_terms(EVENT_TYPE_TAXONOMY, $child_args);
-        if(!empty($child_terms)) {
-            $event_type_ids[] = $child_terms[0]->ID;
-        } else {
+
+        $child_ID = static::search_name_then_slug($year, $child_args);
+
+        if( ! $child_ID) {
             $term = wp_insert_term(
                 $year,
                 EVENT_TYPE_TAXONOMY,
@@ -79,8 +96,10 @@ class Taxonomy {
                     array($event_type, $year)
                 );
             }
-            $event_type_ids[] = $term['term_id'];
+            $child_ID = $term['term_id'];
         }
+
+        $event_type_ids[] = $child_ID;
 
         return $event_type_ids;
     }
