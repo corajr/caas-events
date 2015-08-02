@@ -63,7 +63,7 @@ class Authors {
         return $author_nicename;
     }
 
-    public function get_wp_authors_for($item) {
+    public static function get_wp_authors_for($item) {
         $authors = array();
         foreach ($item['presenters'] as $creator) {
             $authors[] = static::get_or_create_wp_author($creator);
@@ -71,7 +71,7 @@ class Authors {
         return $authors;
     }
 
-    public function do_add_coauthors($post_id, $post_obj) {
+    public static function do_add_coauthors($post_id, $post_obj) {
         global $coauthors_plus;
 
         $authors = static::get_wp_authors_for($post_obj);
