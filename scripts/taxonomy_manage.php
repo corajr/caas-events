@@ -38,7 +38,7 @@ class Taxonomy {
             );
             if (is_wp_error($parent)) {
                 $msg = $parent->get_error_message();
-                die(implode("\n", array($msg, $event_type, $year)));
+                die(implode("\n", array('parent', $msg, $event_type, $year)) . "\n");
             }
             $parent_ID = $parent['term_id'];
         }
@@ -61,7 +61,7 @@ class Taxonomy {
             );
             if (is_wp_error($term)) {
                 $msg = $term->get_error_message();
-                die(implode("\n", array($msg, $event_type, $year)));
+                die(implode("\n", array('child', $msg, $event_type, $year)) . "\n");
             }
             $event_type_ids[] = $term['term_id'];
         }
