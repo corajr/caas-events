@@ -37,7 +37,8 @@ class Taxonomy {
                 EVENT_TYPE_TAXONOMY
             );
             if (is_wp_error($parent)) {
-                die($parent->get_error_message());
+                $msg = $parent->get_error_message();
+                die(implode("\n", array($msg, $event_type, $year)));
             }
             $parent_ID = $parent['term_id'];
         }
@@ -59,7 +60,8 @@ class Taxonomy {
                 )
             );
             if (is_wp_error($term)) {
-                die($term->get_error_message());
+                $msg = $term->get_error_message();
+                die(implode("\n", array($msg, $event_type, $year)));
             }
             $event_type_ids[] = $term['term_id'];
         }
