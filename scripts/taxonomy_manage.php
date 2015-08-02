@@ -36,6 +36,9 @@ class Taxonomy {
                 $event_type,
                 EVENT_TYPE_TAXONOMY
             );
+            if (is_wp_error($parent)) {
+                die($parent->get_error_message());
+            }
             $parent_ID = $parent['term_id'];
         }
 
@@ -55,6 +58,9 @@ class Taxonomy {
                     'parent' => $parent_ID,
                 )
             );
+            if (is_wp_error($term)) {
+                die($term->get_error_message());
+            }
             $event_type_ids[] = $term['term_id'];
         }
 
