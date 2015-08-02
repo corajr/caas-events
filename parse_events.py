@@ -15,7 +15,8 @@ def get_values(row):
 
 
 def get_authors(row):
-    authors = [HumanName(x) for x in row['presenters'].split(u',')]
+    names = row['presenters'].split(u',')
+    authors = [HumanName(x) for x in names] if len(names) > 0 and names[0] != '' else []
     return [{'firstName': x.first, 'lastName': x.last} for x in authors]
 
 
