@@ -34,17 +34,18 @@ class Taxonomy {
         if (is_wp_error($terms)) {
             die_from('search failed', $terms, array($event_type));
         } else if (!empty($terms)) {
-            return $terms[0]->ID;
+            return $terms[0]->term_id;
         } else {
             $slug = array(
                 'slug' => sanitize_title($name),
             );
+            print_r($slug);
             $args2 = array_merge($args, $slug);
             $terms = get_terms(EVENT_TYPE_TAXONOMY, $args2);
             if (is_wp_error($terms)) {
                 die_from('search failed', $terms, array($event_type));
             } else if (!empty($terms)) {
-                return $terms[0]->ID;
+                return $terms[0]->term_id;
             } else {
                 return false;
             }
