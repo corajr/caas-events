@@ -24,35 +24,9 @@ class Taxonomy {
         return $year;
     }
 
-    public static function search_name_then_slug($name, $args = array()) {
-        $name_args = array(
-            'name__like' => $name,
-            'get' => 'all',
-        );
-
-        $args1 = array_merge($args, $name_args);
-        $terms = get_terms(EVENT_TYPE_TAXONOMY, $args1);
-        if (is_wp_error($terms)) {
-            die_from('search failed', $terms, array($event_type));
-        } else if (!empty($terms)) {
-            return $terms[0]->term_id;
-        } else {
-            $slug = array(
-                'slug' => sanitize_title($name),
-                'get' => 'all',
-            );
-
-            $args2 = array_merge($args, $slug);
-            $terms = get_terms(EVENT_TYPE_TAXONOMY, $args2);
-
-            if (is_wp_error($terms)) {
-                die_from('search failed', $terms, array($event_type));
-            } else if (!empty($terms)) {
-                return $terms[0]->term_id;
-            } else {
-                return false;
-            }
-        }
+    public static function find_term($name, $parent = 0) {
+        $term = term_exists($name, EVENT_TYPE_TAXONOMY, $parent);
+        return $term ? $term['term_id'] : false;
     }
 
     public static function get_or_create_terms($event) {
@@ -60,8 +34,12 @@ class Taxonomy {
         $year = static::get_year($event);
         $event_type = $event['lecture-series'];
 
+        if (empty($event_type)) {
+            return array();
+        }
+
         // Get or add parent term
-        $parent_ID = static::search_name_then_slug($event_type);
+        $parent_ID = static::find_term($event_type);
 
         if ( ! $parent_ID ) {
             $parent = wp_insert_term(
@@ -81,11 +59,7 @@ class Taxonomy {
         $parent_ID = intval($parent_ID);
 
         // Get or add academic-year term
-        $child_args = array(
-            'parent' => $parent_ID,
-        );
-
-        $child_ID = static::search_name_then_slug($year, $child_args);
+        $child_ID = static::find_term($year, $parent_ID);
 
         if( ! $child_ID) {
             $term = wp_insert_term(
