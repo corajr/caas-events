@@ -32,13 +32,17 @@ class Events_Command extends WP_CLI_Command {
                            'meta_value' => $event['id'],
                            'post_type' => 'event',
             );
+
+            $existed = false;
             $posts = get_posts($args);
             if (!empty($posts)) {
                 $post_id = $posts[0]->ID;
+                $existed = true;
             } else {
                 $post_id = wp_insert_post(array(
                     'post_type' => 'event',
                     'post_title' => $event['title'],
+                    'post_excerpt' => $event['dek'],
                     'post_content' => $event['description'],
                     'post_status' => 'publish',
                     'comment_status' => 'closed',
@@ -50,6 +54,14 @@ class Events_Command extends WP_CLI_Command {
                 update_post_meta($post_id, 'wpcf-event-date-time', $event['datetime']);
                 update_post_meta($post_id, 'wpcf-location', $event['location']);
                 update_post_meta($post_id, 'old-event-id', $event['id']);
+                if ($existed) {
+                    $updating = array(
+                        'ID' => $post_id,
+                        'post_title' => $event['title'],
+                        'post_excerpt' => $event['dek'],
+                    );
+                    wp_update_post($updating);
+                }
                 Authors::do_add_coauthors($post_id, $event);
                 Taxonomy::add_event_type($post_id, $event);
             }

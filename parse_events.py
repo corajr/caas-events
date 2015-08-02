@@ -1,12 +1,22 @@
 #!/usr/bin/env python
 import xlrd
 import json
+import pytz
+import datetime
 import calendar
-# import time
+from nameparser import HumanName
+
+
+eastern = pytz.timezone('US/Eastern')
 
 
 def get_values(row):
     return map(lambda x: x.value, row)
+
+
+def get_authors(row):
+    authors = [HumanName(x) for x in row['presenters'].split(u',')]
+    return [{'firstName': x.first, 'lastName': x.last} for x in authors]
 
 
 def parse_workbook(filename):
@@ -18,11 +28,11 @@ def parse_workbook(filename):
         row = dict(zip(header, get_values(sh.row(rx))))
         row['id'] = int(row['id'])
         dt_xls = xlrd.xldate_as_tuple(row['datetime'], 0)
-        dt = calendar.timegm(dt_xls)
+        dt = datetime.datetime(*dt_xls)
+        dt = eastern.localize(dt)
+        dt = calendar.timegm(dt.utctimetuple())
         row['datetime'] = dt
-        if row['id'] == 417:
-            print dt
-            assert dt == 1412281800
+        row['presenters'] = get_authors(row)
         del row['description']
         out[row['id']] = row
     return out
@@ -30,4 +40,4 @@ def parse_workbook(filename):
 if __name__ == '__main__':
     data = parse_workbook('New CAAS-Events.xls')
     with open('updated_events.json', 'wb') as f:
-        json.dump(data, f, indent=4)
+        json.dump(data.values(), f, indent=4)
