@@ -10,6 +10,11 @@ function academic_year(DateTime $userDate) {
     return $currentYear . '-' . ($currentYear+1);
 }
 
+function die_from($msg, WP_Error $error, $rest = array()) {
+    $err = $error->get_error_message();
+    $rest_txt = print_r($rest, true);
+    die(implode("\n", array($msg, $err, $rest_txt)) . "\n");
+}
 
 class Taxonomy {
     public static function get_year($event) {
@@ -30,7 +35,10 @@ class Taxonomy {
             'get' => 'all',
         );
         $terms = get_terms(EVENT_TYPE_TAXONOMY, $args);
-        if (!empty($terms)) {
+        if (is_wp_error($terms)) {
+            die_from('search failed', $terms, array($event_type));
+        }
+        else if (!empty($terms)) {
             $parent_ID = $terms[0]->ID;
         } else {
             $parent = wp_insert_term(
@@ -38,8 +46,11 @@ class Taxonomy {
                 EVENT_TYPE_TAXONOMY
             );
             if (is_wp_error($parent)) {
-                $msg = $parent->get_error_message();
-                die(implode("\n", array('parent', $msg, $event_type, $year)) . "\n");
+                die_from(
+                    "parent couldn't insert", 
+                    $parent, 
+                    array($event_type, $year)
+                ); 
             }
             $parent_ID = $parent['term_id'];
         }
@@ -62,8 +73,11 @@ class Taxonomy {
                 )
             );
             if (is_wp_error($term)) {
-                $msg = $term->get_error_message();
-                die(implode("\n", array('child', $msg, $event_type, $year)) . "\n");
+                die_from(
+                    "child couldn't insert",
+                    $term,
+                    array($event_type, $year)
+                );
             }
             $event_type_ids[] = $term['term_id'];
         }
