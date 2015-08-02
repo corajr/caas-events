@@ -1,6 +1,8 @@
 <?php
 class Authors {
     public static function find_creator($creator) {
+        global $coauthors_plus;
+
         $args = array(
             'meta_query' => array(
                 'relation' => 'AND',
@@ -22,7 +24,15 @@ class Authors {
         );
 
         $authors = get_users( $args );
-        return reset( $authors );
+
+        if (!empty($authors)) {
+            return $authors[0];
+        } else {
+            $display_name = $creator['firstName'] . ' ' . $creator['lastName'];
+            $user_login = sanitize_title($display_name);
+            $guest = $coauthors_plus->guest_authors->get_guest_author_by('user_login', $user_login);
+            return $guest;
+        }
     }
 
     public static function add_guest_author( $creator ) {
@@ -39,16 +49,8 @@ class Authors {
             'last_name' => $creator['lastName'],
         );
         
-        if (!empty( $coauthors_plus )) {
-            $user_id = $coauthors_plus->guest_authors->create( $args );
-            return $user_login;
-        } else {
-            $args['user_pass'] = wp_generate_password();
-            $user_id = wp_insert_user( $args );  
-            $users = get_users( array( 'include' => array($user_id) ) );
-            $user = reset($users);
-            return $user->user_nicename;
-        }
+        $user_id = $coauthors_plus->guest_authors->create( $args );
+        return $user_login;
     }
 
     public static function get_or_create_wp_author($creator) {
@@ -76,16 +78,7 @@ class Authors {
 
         $authors = static::get_wp_authors_for($post_obj);
 
-        if (!empty($coauthors_plus)) {
-            $coauthors_plus->add_coauthors($post_id, $authors);
-        } else {
-            $author = $authors[0];
-            $user = get_user_by( 'slug', $author );
-            wp_update_post( array(
-                'ID' => $post_id,
-                'post_author' => $user->ID,
-            ) );
-        }
+        $coauthors_plus->add_coauthors($post_id, $authors);
     }
 
 }
