@@ -1,6 +1,8 @@
 <?php
 
 require_once("author_manage.php");
+require_once("taxonomy_manage.php");
+
 /**
  * Implements a command to add events.
  */
@@ -49,6 +51,7 @@ class Events_Command extends WP_CLI_Command {
                 update_post_meta($post_id, 'wpcf-location', $event['location']);
                 update_post_meta($post_id, 'old-event-id', $event['id']);
                 Authors::do_add_coauthors($post_id, $event);
+                Taxonomy::add_event_type($post_id, $event);
             }
         }
     
