@@ -78,6 +78,8 @@ class Taxonomy {
             $parent_ID = $parent['term_id'];
         }
 
+        $parent_ID = intval($parent_ID);
+
         // Get or add academic-year term
         $child_args = array(
             'parent' => $parent_ID,
@@ -102,6 +104,7 @@ class Taxonomy {
             }
             $child_ID = $term['term_id'];
         }
+        $child_ID = intval($child_ID);
 
         $event_type_ids[] = $child_ID;
 
