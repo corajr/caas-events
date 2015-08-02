@@ -26,7 +26,8 @@ class Taxonomy {
 
     public static function search_name_then_slug($name, $args = array()) {
         $name_args = array(
-            'name__like' => $name
+            'name__like' => $name,
+            'get' => 'all',
         );
 
         $args1 = array_merge($args, $name_args);
@@ -38,10 +39,12 @@ class Taxonomy {
         } else {
             $slug = array(
                 'slug' => sanitize_title($name),
+                'get' => 'all',
             );
-            print_r($slug);
+
             $args2 = array_merge($args, $slug);
             $terms = get_terms(EVENT_TYPE_TAXONOMY, $args2);
+
             if (is_wp_error($terms)) {
                 die_from('search failed', $terms, array($event_type));
             } else if (!empty($terms)) {
