@@ -27,7 +27,7 @@ class Taxonomy {
         // Get or add parent term
         $args = array(
             'name__like' => $event_type,
-            'hide_empty' => false,
+            'get' => 'all',
         );
         $terms = get_terms(EVENT_TYPE_TAXONOMY, $args);
         if (!empty($terms)) {
@@ -48,7 +48,7 @@ class Taxonomy {
         $child_args = array(
             'parent' => $parent_ID,
             'name__like' => $year,
-            'hide_empty' => false,
+            'get' => 'all',
         );
         $child_terms = get_terms(EVENT_TYPE_TAXONOMY, $child_args);
         if(!empty($child_terms)) {
