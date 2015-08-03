@@ -39,6 +39,6 @@ def parse_workbook(filename):
     return out
 
 if __name__ == '__main__':
-    data = parse_workbook('New CAAS-Events.xls')
+    data = parse_workbook('New CAAS-Events (1).xls')
     with open('updated_events.json', 'wb') as f:
         json.dump(data.values(), f, indent=4)
