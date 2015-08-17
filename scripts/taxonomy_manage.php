@@ -59,9 +59,9 @@ class Taxonomy {
         $parent_ID = intval($parent_ID);
 
         // Get or add academic-year term
-        $child_ID = static::find_term($year, $parent_ID);
+        // $child_ID = static::find_term($year, $parent_ID);
 
-        if( ! $child_ID) {
+        /* if( ! $child_ID) {
             $term = wp_insert_term(
                 $year,
                 EVENT_TYPE_TAXONOMY,
@@ -79,8 +79,8 @@ class Taxonomy {
             $child_ID = $term['term_id'];
         }
         $child_ID = intval($child_ID);
-
-        $event_type_ids[] = $child_ID;
+    */
+        $event_type_ids[] = $parent_ID;
 
         return $event_type_ids;
     }
