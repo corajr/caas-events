@@ -1,3 +1,6 @@
+*.xls
+*.json
+*.csv
 www.princeton.edu
 events.json
 scraperwiki.sqlite
