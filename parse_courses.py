@@ -3,7 +3,6 @@
 import csv
 import json
 import re
-from collections import Counter
 from nameparser import HumanName
 
 
@@ -32,12 +31,8 @@ def get_courses(course_csv):
 if __name__ == '__main__':
     courses = get_courses('courses.csv')
     print(len(courses))
-    c = Counter()
+    course_info = {}
     for course in courses:
-        for number in course['courseNumber']:
-            c[number] += 1
-        # print(course['courseNumber'])
-    print(c.most_common(10))
+        course_info[course['courseNumber'][0]] = course
     with open('courses.json', 'w') as f:
-        pass
-        # json.dump(courses, f)
+        json.dump(course_info, f, indent=4)
