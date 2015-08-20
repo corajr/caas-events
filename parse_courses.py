@@ -22,11 +22,14 @@ def get_courses(course_csv):
         reader = csv.DictReader(f)
         for row in reader:
             row = {k: v.strip() for k, v in row.items()}
-            instructor = HumanName(row['Instructor'])
-            row['Instructor'] = {
-                'firstName': instructor.first,
-                'lastName': instructor.last
-            }
+            instructor = HumanName(row.pop('Instructor'))
+            if instructor.last != "":
+                row['Instructors'] = [{
+                    'firstName': instructor.first,
+                    'lastName': instructor.last
+                }]
+            else:
+                row['Instructors'] = []
             number = row.pop('Course #')
             row['courseNumber'] = parse_course_numbers(number)
             row['slug'] = find_aas(row['courseNumber'])
