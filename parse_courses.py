@@ -11,6 +11,10 @@ def parse_course_numbers(text):
     numbers = re.findall(r'[A-Z]{3,3}\s+\d{3,3}', text)
     return numbers
 
+def find_aas(lst):
+    for x in lst:
+        if x.startswith('AAS'):
+            return x.partition(' ')[2]
 
 def get_courses(course_csv):
     courses = []
@@ -25,6 +29,7 @@ def get_courses(course_csv):
             }
             number = row.pop('Course #')
             row['courseNumber'] = parse_course_numbers(number)
+            row['slug'] = find_aas(row['courseNumber'])
             courses.append(row)
     return courses
 
