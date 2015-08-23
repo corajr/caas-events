@@ -1,6 +1,7 @@
 <?php
 
 require_once("author_manage.php");
+require_once("custom_fields.php");
 
 /**
  * Implements a command to add events.
@@ -25,6 +26,9 @@ class Courses_Command extends WP_CLI_Command {
 		list( $filename ) = $args;
 		$js_str = file_get_contents($filename);
 		$json_a = json_decode($js_str, true);
+
+		$subfields = get_checkbox_possible_values('subfields');
+		$programs = get_checkbox_possible_values('program');
 
 		foreach ($json_a as $course) {
 			$args = array(
@@ -59,9 +63,18 @@ class Courses_Command extends WP_CLI_Command {
 				if ($course['Course Status']) {
 					update_post_meta($post_id, 'wpcf-course-status', $course['Course Status']);
 				}
-				/* if ($course['Subfield']) {  // needs checkbox handling
-				   update_post_meta($post_id, 'wpcf-subfields', $course['Subfield']);
-				   } */
+				if ($course['Program']) {
+					$program = $programs[$course['Program']];
+					if ($program) {
+						update_post_meta($post_id, 'wpcf-program', $program);
+					}
+				}
+				if ($course['Subfield']) {
+					$subfield = $subfields[$course['Subfield']];
+					if ($subfield) {
+						update_post_meta($post_id, 'wpcf-subfields', $subfield);
+					}
+				}
 				if ($existed) {
 					$updating = array(
 						'ID' => $post_id,
