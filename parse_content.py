@@ -4,8 +4,17 @@ import csv
 import json
 
 
+def nameToAuthor(names, lastName):
+    if lastName in names:
+        author = names[lastName]
+        return {'family': lastName, 'given': author['firstName']}
+    return {'family': lastName}
+
+
 def get_content(fname='Public Scholarship - Sheet1.csv'):
-    content = {}
+    content = []
+    with open('names.json') as names_f:
+        names = json.load(names_f)
     with open(fname) as f:
         reader = csv.DictReader(f)
         for i, row in enumerate(reader):
@@ -21,12 +30,12 @@ def get_content(fname='Public Scholarship - Sheet1.csv'):
             item = {
                 'id': item_id,
                 'title': row['Content Name:'],
-                'author': [{'family': row['Last Name:']}],
+                'author': [nameToAuthor(names, row['Last Name:'])],
                 'URL': row['Link:'],
                 'type': item_type,
                 'note': category
             }
-            content[item_id] = item
+            content.append(item)
     return content
 
 
