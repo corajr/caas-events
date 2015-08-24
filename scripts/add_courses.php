@@ -24,6 +24,27 @@ class Courses_Command extends WP_CLI_Command {
 			}
 		}
 	}
+	private function update_course_cat($post_id, $course, $row_name, $parent_slug) {
+		$parent = get_terms( 'course-cat', array('hide_empty' => false, 'slug' => $parent_slug ));
+		if ($parent && $course[$row_name]) {
+			$parent_id = intval($parent->term_taxonomy_id);
+			$args = array(
+				'hide_empty' => false,
+				'child_of' => $parent_id,
+				'name__like' => $course[$row_name],
+			);
+			$cats = get_terms( 'course-cat', $args );
+			if ($cats) {
+				$cat_ids = array();
+				foreach ($cats as $cat) {
+					if ($cat->name == $course[$row_name]) {
+						$cat_ids[] = intval($cat->term_taxonomy_id);
+					}
+				}
+				wp_set_object_terms($post_id, $cat_ids, 'course-cat', true);
+			}
+		}
+	}
 
 	/**
 	 * Adds courses to the database.
@@ -79,10 +100,9 @@ class Courses_Command extends WP_CLI_Command {
 				$this->update_field($post_id, $course, 'Course Status', 'course-status');
 				$this->update_field($post_id, $course, 'Lecture', 'lecture-time');
 				$this->update_field($post_id, $course, 'Precept', 'precept-time');
-				$this->update_field($post_id, $course, 'Year', 'academic-year');
-				$this->update_checkbox($post_id, $course, 'Semester', 'semester');
-				$this->update_checkbox($post_id, $course, 'Program', 'program');
-				$this->update_checkbox($post_id, $course, 'Subfield', 'subfields');
+				$this->update_course_cat($post_id, $course, 'Program', 'program');
+				$this->update_course_cat($post_id, $course, 'Subfield', 'subfield');
+				$this->update_course_cat($post_id, $course, 'Semester', 'academic-year');
 
 				if ($existed) {
 					$updating = array(

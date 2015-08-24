@@ -39,7 +39,8 @@ def get_courses(course_csv):
         reader = csv.DictReader(f)
         for row in reader:
             row = {k: v.strip() for k, v in row.items()}
-            row.pop("")
+            if "" in row:
+                del row[""]
             instructor = HumanName(row.pop('Instructor'))
             if instructor.last != "":
                 row['Instructors'] = [{
@@ -57,10 +58,10 @@ def get_courses(course_csv):
                 row['Program'] = 'Graduate'
             else:
                 row['Program'] = 'Undergraduate'
-            row['Lecture'] = get_time_from(row, '1', 'Lecture')
-            row['Precept'] = get_time_from(row, '2', 'Precept')
-            row['Semester'] = 'Fall'
-            row['Year'] = '2015-2016'
+            if course_csv == 'Department Courses.csv':
+                row['Lecture'] = get_time_from(row, '1', 'Lecture')
+                row['Precept'] = get_time_from(row, '2', 'Precept')
+                row['Semester'] = 'Fall 2015'
             courses.append(row)
     return courses
 
@@ -96,7 +97,8 @@ def evaluate_courses(course_info):
         print("{}:\t{:.0%}".format(k, float(v)/len(course_info)))
 
 if __name__ == '__main__':
-    courses = get_courses('Department Courses.csv')
+    courses = get_courses('courses.csv')
+    courses.extend(get_courses('Department Courses.csv'))
     print(len(courses))
     course_info = get_course_info(courses)
     evaluate_courses(course_info)
