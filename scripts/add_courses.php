@@ -8,6 +8,23 @@ require_once("custom_fields.php");
  */
 class Courses_Command extends WP_CLI_Command {
 
+	private $checkboxes = array();
+
+	private function update_field($post_id, $course, $row_name, $field_name) {
+		if ($course[$row_name]) {
+			update_post_meta($post_id, 'wpcf-' . $field_name, $course[$row_name]);
+		}
+	}
+
+	private function update_checkbox($post_id, $course, $row_name, $field_name) {
+		if ($course[$row_name]) {
+			$box = $this->checkboxes[$field_name][$course[$row_name]];
+			if ($box) {
+				update_post_meta($post_id, 'wpcf-' . $field_name, $box);
+			}
+		}
+	}
+
 	/**
 	 * Adds courses to the database.
 	 *
@@ -27,8 +44,9 @@ class Courses_Command extends WP_CLI_Command {
 		$js_str = file_get_contents($filename);
 		$json_a = json_decode($js_str, true);
 
-		$subfields = get_checkbox_possible_values('subfields');
-		$programs = get_checkbox_possible_values('program');
+		$this->checkboxes['subfields'] = get_checkbox_possible_values('subfields');
+		$this->checkboxes['program'] = get_checkbox_possible_values('program');
+		$this->checkboxes['semester'] = get_checkbox_possible_values('semester');
 
 		foreach ($json_a as $course) {
 			$args = array(
@@ -57,24 +75,15 @@ class Courses_Command extends WP_CLI_Command {
 
 			if ($post_id) {
 				update_post_meta($post_id, 'wpcf-course-number', $course_numbers);
-				if ($course['Dist Area']) {
-					update_post_meta($post_id, 'wpcf-distribution-area', $course['Dist Area']);
-				}
-				if ($course['Course Status']) {
-					update_post_meta($post_id, 'wpcf-course-status', $course['Course Status']);
-				}
-				if ($course['Program']) {
-					$program = $programs[$course['Program']];
-					if ($program) {
-						update_post_meta($post_id, 'wpcf-program', $program);
-					}
-				}
-				if ($course['Subfield']) {
-					$subfield = $subfields[$course['Subfield']];
-					if ($subfield) {
-						update_post_meta($post_id, 'wpcf-subfields', $subfield);
-					}
-				}
+				$this->update_field($post_id, $course, 'Dist Area', 'distribution-area');
+				$this->update_field($post_id, $course, 'Course Status', 'course-status');
+				$this->update_field($post_id, $course, 'Lecture', 'lecture-time');
+				$this->update_field($post_id, $course, 'Precept', 'precept-time');
+				$this->update_field($post_id, $course, 'Year', 'academic-year');
+				$this->update_checkbox($post_id, $course, 'Semester', 'semester');
+				$this->update_checkbox($post_id, $course, 'Program', 'program');
+				$this->update_checkbox($post_id, $course, 'Subfield', 'subfields');
+
 				if ($existed) {
 					$updating = array(
 						'ID' => $post_id,

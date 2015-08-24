@@ -7,8 +7,12 @@ from collections import Counter
 from nameparser import HumanName
 
 
+def unspace(text):
+    return re.sub(r'\s+', ' ', text).strip()
+
+
 def parse_course_numbers(text):
-    text = re.sub(r'\s+', ' ', text)
+    text = unspace(text)
     numbers = re.findall(r'[A-Z]{3,3}\s+\d{3,3}', text)
     return numbers
 
@@ -19,12 +23,23 @@ def find_aas(lst):
             return x.partition(' ')[2]
 
 
+def get_time_from(row, suffix, name):
+    if 'Section ' + suffix not in row:
+        return None
+    info = []
+    info.append('{} {}:'.format(name, unspace(row['Section ' + suffix])))
+    info.append(unspace(row['Time ' + suffix]))
+    info.append(unspace(row['Days ' + suffix]))
+    return ' '.join(info)
+
+
 def get_courses(course_csv):
     courses = []
     with open(course_csv) as f:
         reader = csv.DictReader(f)
         for row in reader:
             row = {k: v.strip() for k, v in row.items()}
+            row.pop("")
             instructor = HumanName(row.pop('Instructor'))
             if instructor.last != "":
                 row['Instructors'] = [{
@@ -36,10 +51,16 @@ def get_courses(course_csv):
             number = row.pop('Course #')
             row['courseNumber'] = parse_course_numbers(number)
             row['slug'] = find_aas(row['courseNumber'])
+            if row['slug'] is None:
+                continue
             if int(row['slug']) >= 500:
                 row['Program'] = 'Graduate'
             else:
                 row['Program'] = 'Undergraduate'
+            row['Lecture'] = get_time_from(row, '1', 'Lecture')
+            row['Precept'] = get_time_from(row, '2', 'Precept')
+            row['Semester'] = 'Fall'
+            row['Year'] = '2015-2016'
             courses.append(row)
     return courses
 
@@ -75,9 +96,9 @@ def evaluate_courses(course_info):
         print("{}:\t{:.0%}".format(k, float(v)/len(course_info)))
 
 if __name__ == '__main__':
-    courses = get_courses('courses.csv')
+    courses = get_courses('Department Courses.csv')
     print(len(courses))
     course_info = get_course_info(courses)
     evaluate_courses(course_info)
-    with open('courses.json', 'w') as f:
+    with open('scripts/courses.json', 'w') as f:
         json.dump(course_info, f, indent=4)
